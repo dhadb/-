@@ -73,9 +73,3 @@ export interface ElectronAPI {
   onShowSettings: (callback: () => void) => () => void
   onWindowMode: (callback: (mode: ViewMode) => void) => () => void
 }
-
-declare global {
-  interface Window {
-    electronAPI: ElectronAPI
-  }
-}
