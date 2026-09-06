@@ -148,11 +148,12 @@ const SearchBar: React.FC = () => {
   return (
     <div className="px-3 pb-2 pt-2">
       <div className={`search-input overflow-hidden rounded-lg ${focused ? 'is-focused' : ''}`}>
-        <div className="flex h-10 items-center px-3">
+        <div className="flex h-11 items-center px-3">
           <Search size={15} color={focused ? 'var(--color-primary)' : 'var(--text-placeholder)'} className="flex-shrink-0" />
           <input
             ref={inputRef}
             type="search"
+            aria-label={t('search.placeholder')}
             placeholder={t('search.placeholder')}
             value={local}
             onChange={onChange}

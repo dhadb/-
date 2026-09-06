@@ -1,5 +1,5 @@
-import React, { useCallback, memo } from 'react'
-import { Copy, Pin, PinOff, Trash2, ExternalLink, Mail, Hash, Code, FileText, FolderOpen, Type, Check, Heart, Circle, CheckCircle2, ListPlus } from 'lucide-react'
+import React, { useCallback, memo, useEffect, useRef, useState } from 'react'
+import { Copy, Pin, PinOff, Trash2, ExternalLink, Mail, Hash, Code, FileText, FolderOpen, Type, Check, Heart, Circle, CheckCircle2, ListPlus, MoreHorizontal } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useClipboardStore, ClipboardItem } from '../store/clipboardStore'
 import { getClipboardHighlightIndexes } from '../utils/clipboard'
@@ -75,6 +75,8 @@ const ClipboardItemCard: React.FC<Props> = memo(({ item, isSelected, onSelect, s
   const addToStack = useClipboardStore(s => s.addToStack)
   const stackIds = useClipboardStore(s => s.stackIds)
   const { t, typeLabel, language } = useI18n()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const actionsRef = useRef<HTMLDivElement>(null)
 
   const cfg = TYPE_CFG[item.type] || TYPE_CFG.text
   const isCopied = copiedId === item.id
@@ -98,13 +100,30 @@ const ClipboardItemCard: React.FC<Props> = memo(({ item, isSelected, onSelect, s
   }, [copyOnSelect, copyItem, item.id, selectionMode])
   const onDelete = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
+    setMenuOpen(false)
     void deleteItems([item.id]).then(count => {
       if (count > 0) notify(t('toast.deleted', { count }), 'success', 'undo-delete')
     })
-  }, [deleteItems, item.id, notify, t])
-  const onPin = useCallback((e: React.MouseEvent) => { e.stopPropagation(); togglePin(item.id) }, [togglePin, item.id])
-  const onFavorite = useCallback((e: React.MouseEvent) => { e.stopPropagation(); toggleFavorite(item.id) }, [toggleFavorite, item.id])
-  const onStack = useCallback((e: React.MouseEvent) => { e.stopPropagation(); addToStack(item.id) }, [addToStack, item.id])
+  }, [deleteItems, item.id, notify, setMenuOpen, t])
+  const onPin = useCallback((e: React.MouseEvent) => { e.stopPropagation(); setMenuOpen(false); void togglePin(item.id) }, [item.id, setMenuOpen, togglePin])
+  const onFavorite = useCallback((e: React.MouseEvent) => { e.stopPropagation(); setMenuOpen(false); void toggleFavorite(item.id) }, [item.id, setMenuOpen, toggleFavorite])
+  const onStack = useCallback((e: React.MouseEvent) => { e.stopPropagation(); setMenuOpen(false); addToStack(item.id) }, [addToStack, item.id, setMenuOpen])
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const onPointerDown = (event: MouseEvent) => {
+      if (!actionsRef.current?.contains(event.target as Node)) setMenuOpen(false)
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', onPointerDown)
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [menuOpen])
 
   const typeColor = cfg.cssVar
   const typeBg = `color-mix(in srgb, ${cfg.cssVar} 8%, transparent)`
@@ -118,7 +137,15 @@ const ClipboardItemCard: React.FC<Props> = memo(({ item, isSelected, onSelect, s
     <div
       onClick={onOpenDetail}
       onDoubleClick={onDoubleClickCopy}
-      className={`glass-card clipboard-card rounded-lg overflow-hidden cursor-pointer flex flex-col ${isSelected ? 'selected' : ''} ${isChecked ? 'checked' : ''} ${isCode ? 'verification-card' : ''}`}
+      onKeyDown={event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onOpenDetail(event as unknown as React.MouseEvent)
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      className={`glass-card clipboard-card rounded-lg overflow-visible cursor-pointer flex flex-col ${isSelected ? 'selected' : ''} ${isChecked ? 'checked' : ''} ${isCode ? 'verification-card' : ''} ${isCopied ? 'just-copied' : ''}`}
     >
       <div className={`type-bar ${cfg.bar} w-full`} style={{ height: 2 }} />
       <div className="flex-1 flex items-start gap-2.5 p-2.5 overflow-hidden">
@@ -185,39 +212,53 @@ const ClipboardItemCard: React.FC<Props> = memo(({ item, isSelected, onSelect, s
           )}
         </div>
 
-        {!selectionMode && <div className="card-actions flex items-center gap-0.5 flex-shrink-0">
+        {!selectionMode && <div ref={actionsRef} className="card-actions relative flex items-center gap-0.5 flex-shrink-0">
           <button onClick={onCopy} className="action-btn copy" title={t('item.copy')}>
             {isCopied ? <Check size={13} color="var(--color-success)" strokeWidth={3} /> : <Copy size={13} />}
           </button>
-          <button onClick={onPin} className={`action-btn pin ${item.pinned ? 'active' : ''}`} title={item.pinned ? t('item.unpin') : t('item.pin')}>
-            {item.pinned ? <PinOff size={13} /> : <Pin size={13} />}
+          <button
+            onClick={event => { event.stopPropagation(); setMenuOpen(value => !value) }}
+            className={`action-btn ${menuOpen ? 'active' : ''}`}
+            title={t('tabs.more')}
+            aria-expanded={menuOpen}
+            aria-haspopup="menu"
+          >
+            <MoreHorizontal size={14} />
           </button>
-          <button onClick={onFavorite} className={`action-btn ${item.favorited ? 'active' : ''}`} title={item.favorited ? t('item.unfavorite') : t('item.favorite')}
-            style={item.favorited ? { color: '#f472b6', background: 'rgba(244,114,182,0.12)' } : undefined}>
-            <Heart size={13} fill={item.favorited ? '#f472b6' : 'none'} />
-          </button>
-          <button onClick={onStack} disabled={stackIds.includes(item.id)} className="action-btn disabled:opacity-30" title={stackIds.includes(item.id) ? t('stack.queued') : t('stack.add')}><ListPlus size={13} /></button>
-          <button onClick={onDelete} className="action-btn delete" title={t('item.delete')}>
-            <Trash2 size={13} />
-          </button>
+          {menuOpen && (
+            <div onClick={event => event.stopPropagation()} className="card-menu absolute right-0 top-8 z-30 w-44 rounded-md p-1 shadow-xl fade-in" role="menu">
+              <button onClick={onPin} className="menu-item" role="menuitem">
+                {item.pinned ? <PinOff size={13} /> : <Pin size={13} />}
+                {item.pinned ? t('item.unpin') : t('item.pin')}
+              </button>
+              <button
+                onClick={onFavorite}
+                className="menu-item"
+                role="menuitem"
+                style={item.favorited ? { color: '#f472b6' } : undefined}
+              >
+                <Heart size={13} fill={item.favorited ? '#f472b6' : 'none'} />
+                {item.favorited ? t('item.unfavorite') : t('item.favorite')}
+              </button>
+              <button onClick={onStack} disabled={stackIds.includes(item.id)} className="menu-item disabled:opacity-40" role="menuitem">
+                <ListPlus size={13} />
+                {stackIds.includes(item.id) ? t('stack.queued') : t('stack.add')}
+              </button>
+              <div className="my-1 h-px" style={{ background: 'var(--border-divider)' }} />
+              <button onClick={onDelete} className="menu-item danger" role="menuitem">
+                <Trash2 size={13} />
+                {t('item.delete')}
+              </button>
+            </div>
+          )}
         </div>}
       </div>
-
-      {isCopied && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none copied-overlay"
-          style={{ background: 'color-mix(in srgb, var(--color-success) 8%, transparent)', borderRadius: 12 }}>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full"
-            style={{ background: 'var(--color-success)', boxShadow: '0 4px 16px color-mix(in srgb, var(--color-success) 30%, transparent)' }}>
-            <Check size={15} color="white" strokeWidth={3} />
-            <span className="text-[13px] font-medium text-white">{t('item.copied')}</span>
-          </div>
-        </div>
-      )}
 
       {isSelected && (
         <div className="absolute left-0 top-0 bottom-0 w-[2px] rounded-r"
           style={{ background: 'linear-gradient(to bottom, var(--color-primary-light), var(--color-primary))' }} />
       )}
+      {isCopied && <div className="copy-feedback-rail" aria-hidden="true" />}
     </div>
   )
 })

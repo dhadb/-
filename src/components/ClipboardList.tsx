@@ -3,7 +3,7 @@ import ClipboardItemCard from './ClipboardItemCard'
 import { useClipboardStore } from '../store/clipboardStore'
 import { useI18n } from '../i18n'
 
-const ITEM_H = 84
+const ITEM_H = 76
 const OVERSCAN = 5
 
 const ClipboardList: React.FC = () => {
@@ -23,7 +23,7 @@ const ClipboardList: React.FC = () => {
   const [range, setRange] = useState({ start: 0, end: 24 })
 
   const listDensity = useClipboardStore(s => s.settings.listDensity)
-  const itemH = listDensity === 'compact' ? 72 : listDensity === 'comfortable' ? 96 : ITEM_H
+  const itemH = listDensity === 'compact' ? 64 : listDensity === 'comfortable' ? 88 : ITEM_H
   const totalH = filteredHistory.length * itemH
 
   const scrollToIndex = useCallback((index: number) => {

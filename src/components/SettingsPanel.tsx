@@ -94,7 +94,7 @@ const SettingsPanel: React.FC = memo(() => {
   ]
 
   const Toggle: React.FC<{ on: boolean; set: (v: boolean) => void }> = ({ on, set }) => (
-    <button className={`toggle ${on ? 'on' : ''}`} onClick={() => set(!on)} />
+    <button className={`toggle ${on ? 'on' : ''}`} onClick={() => set(!on)} aria-pressed={on} />
   )
 
   const Slider: React.FC<{ value: number; min: number; max: number; step: number; set: (v: number) => void; unit?: string }> = ({ value, min, max, step, set, unit }) => (
@@ -115,7 +115,7 @@ const SettingsPanel: React.FC = memo(() => {
   )
 
   const Card: React.FC<{ title: string; icon: React.ReactNode; children: React.ReactNode }> = ({ title, icon, children }) => (
-    <div className="glass-card rounded-lg p-5 space-y-4">
+    <div className="setting-section p-5 space-y-4">
       <h3 className="text-[13px] font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
         {icon}{title}
       </h3>
@@ -369,7 +369,7 @@ const SettingsPanel: React.FC = memo(() => {
         return (
           <div className="space-y-4 slide-in-right">
             <div className="glass-card rounded-lg p-6 text-center space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-lg flex items-center justify-center shimmer soft-float overflow-hidden"
+              <div className="w-16 h-16 mx-auto rounded-lg flex items-center justify-center overflow-hidden"
                 style={{
                   boxShadow: '0 8px 24px color-mix(in srgb, var(--color-primary) 25%, transparent)',
                 }}>
