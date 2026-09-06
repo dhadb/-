@@ -45,12 +45,12 @@ export function retainHistoryItems<T extends RetentionItem>(items: T[], options:
   const retained: T[] = []
   let retainedBytes = 0
   for (const item of ordered) {
-    const itemBytes = getUtf8ByteLength([
+    const itemBytes = [
       item.content,
       item.html || '',
       item.rtf || '',
       ...(item.files || []),
-    ].join('\u0000'))
+    ].reduce((total, value) => total + getUtf8ByteLength(value), 0)
     if (retainedBytes + itemBytes > (options.maxTextBytes ?? MAX_HISTORY_TEXT_BYTES)) continue
     retainedBytes += itemBytes
     retained.push(item)
