@@ -1,5 +1,5 @@
-import React, { memo } from 'react'
-import { ChevronRight, ClipboardList, Copy, X } from 'lucide-react'
+import React, { memo, useEffect, useRef, useState } from 'react'
+import { ClipboardList, Copy, X } from 'lucide-react'
 import { useClipboardStore } from '../store/clipboardStore'
 import { useI18n } from '../i18n'
 
@@ -11,15 +11,28 @@ const ClipboardStackBar: React.FC = memo(() => {
   const clearStack = useClipboardStore(s => s.clearStack)
   const { t } = useI18n()
   const items = stackIds.map(id => history.find(item => item.id === id)).filter(Boolean)
+  const currentId = items[0]?.id || null
+  const previousCurrentId = useRef(currentId)
+  const [advancingId, setAdvancingId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!currentId || previousCurrentId.current === currentId) return
+    previousCurrentId.current = currentId
+    setAdvancingId(currentId)
+    const timer = window.setTimeout(() => setAdvancingId(null), 240)
+    return () => window.clearTimeout(timer)
+  }, [currentId])
+
   if (items.length === 0) return null
 
   return (
-    <div key={items.length} className="stack-bar relative z-10 flex items-center gap-2 border-b px-3 py-2" style={{ borderColor: 'var(--border-divider)', background: 'color-mix(in srgb, var(--color-success) 6%, var(--bg-surface))' }}>
+    <div className="stack-bar relative z-10 flex items-center gap-2 border-b px-3 py-2" style={{ borderColor: 'var(--border-divider)', background: 'color-mix(in srgb, var(--color-success) 6%, var(--bg-surface))' }}>
       <ClipboardList size={14} color="var(--color-success)" />
       <span className="text-[11px] font-semibold tabular-nums" style={{ color: 'var(--text-primary)' }}>{t('stack.title', { count: items.length })}</span>
+      <span className="text-[10px] tabular-nums" style={{ color: 'var(--color-success)' }}>{t('stack.position', { count: items.length })}</span>
       <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
         {items.slice(0, 4).map((item, index) => item && (
-          <button key={item.id} onClick={() => removeFromStack(item.id)} className="stack-chip inline-flex max-w-[120px] items-center gap-1 rounded-md px-1.5 py-1 text-[10px] interactive-chip" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }} title={t('stack.remove')}>
+          <button key={item.id} onClick={() => removeFromStack(item.id)} className={`stack-chip inline-flex max-w-[120px] items-center gap-1 rounded-md px-1.5 py-1 text-[10px] interactive-chip ${index === 0 ? `current ${advancingId === item.id ? 'stack-chip-current-enter' : ''}` : ''}`} style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }} title={t('stack.remove')}>
             <span className="text-[9px]" style={{ color: 'var(--color-success)' }}>{index + 1}</span>
             <span className="truncate">{item.content || t('type.image')}</span><X size={10} />
           </button>
@@ -28,7 +41,6 @@ const ClipboardStackBar: React.FC = memo(() => {
       </div>
       <button onClick={() => void copyNextStackItem()} className="action-btn" title={t('stack.copyNext')}><Copy size={13} /></button>
       <button onClick={clearStack} className="action-btn" title={t('stack.clear')}><X size={13} /></button>
-      <ChevronRight size={12} color="var(--text-ghost)" />
     </div>
   )
 })

@@ -1,6 +1,6 @@
 {
   "name": "clipmaster",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "description": "Local-first Windows clipboard knowledge manager with secure search, quick paste, privacy controls, and image history.",
   "author": "ClipMaster Team",
   "license": "MIT",
@@ -30,14 +30,15 @@
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && electron-builder --publish=never",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "build": "npm run typecheck && vite build && electron-builder --publish=never",
     "preview": "vite preview",
     "electron:dev": "vite",
     "test": "vitest run",
-    "check": "tsc --noEmit && vitest run && vite build",
+    "check": "npm run typecheck && vitest run && vite build",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
-    "build:release": "tsc && vite build && electron-builder --publish=never -c.forceCodeSigning=true"
+    "build:release": "npm run typecheck && vite build && electron-builder --publish=never -c.forceCodeSigning=true"
   },
   "build": {
     "appId": "com.clipmaster.app",

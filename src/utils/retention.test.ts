@@ -29,4 +29,18 @@ describe('history retention', () => {
     ], { maxHistory: 50, autoDeleteDays: 0, verificationCodeTtlMinutes: 0, now, maxTextBytes: 4 })
     expect(result.map(value => value.id)).toEqual(['favorite'])
   })
+
+  it('counts rich text and file metadata in the retention budget', () => {
+    const result = retainHistoryItems([
+      item('rich', 1000, { html: 'x'.repeat(8) }),
+      item('plain', 900, { content: 'plain' }),
+    ], {
+      maxHistory: 50,
+      autoDeleteDays: 0,
+      verificationCodeTtlMinutes: 0,
+      now,
+      maxTextBytes: 12,
+    })
+    expect(result.map(value => value.id)).toEqual(['plain'])
+  })
 })

@@ -202,7 +202,7 @@ function App() {
     return (
       <div className="h-screen w-screen flex items-center justify-center" style={{ background: 'var(--bg-root)' }}>
         <div className="flex flex-col items-center gap-4 fade-in">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center shimmer soft-float"
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center shimmer"
             style={{
               color: 'white',
               background: 'var(--color-primary)',

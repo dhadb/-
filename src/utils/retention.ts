@@ -6,6 +6,9 @@ export interface RetentionItem {
   timestamp: number
   pinned: boolean
   favorited: boolean
+  html?: string
+  rtf?: string
+  files?: string[]
 }
 
 export interface RetentionOptions {
@@ -42,7 +45,12 @@ export function retainHistoryItems<T extends RetentionItem>(items: T[], options:
   const retained: T[] = []
   let retainedBytes = 0
   for (const item of ordered) {
-    const itemBytes = getUtf8ByteLength(item.content)
+    const itemBytes = getUtf8ByteLength([
+      item.content,
+      item.html || '',
+      item.rtf || '',
+      ...(item.files || []),
+    ].join('\u0000'))
     if (retainedBytes + itemBytes > (options.maxTextBytes ?? MAX_HISTORY_TEXT_BYTES)) continue
     retainedBytes += itemBytes
     retained.push(item)

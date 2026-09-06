@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isSensitiveClipboardContent, isValidChineseId, passesLuhnCheck } from './privacy'
+import { getClipboardPrivacyScanText, isSensitiveClipboardContent, isValidChineseId, passesLuhnCheck } from './privacy'
 
 describe('sensitive clipboard detection', () => {
   it('detects credentials and validated identity numbers', () => {
@@ -19,5 +19,10 @@ describe('sensitive clipboard detection', () => {
     expect(isSensitiveClipboardContent('password=hunter2', { credentials: false, paymentCards: true, identityNumbers: true })).toBe(false)
     expect(isSensitiveClipboardContent('4111 1111 1111 1111', { credentials: true, paymentCards: false, identityNumbers: true })).toBe(false)
     expect(isSensitiveClipboardContent('11010519491231002X', { credentials: true, paymentCards: true, identityNumbers: false })).toBe(false)
+  })
+
+  it('combines plain and rich clipboard formats for privacy scanning', () => {
+    expect(getClipboardPrivacyScanText('', '<span>password=hunter2</span>', '')).toContain('password=hunter2')
+    expect(getClipboardPrivacyScanText(null, undefined, '')).toBe('')
   })
 })

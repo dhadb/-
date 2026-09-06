@@ -26,6 +26,7 @@ const zh = {
   'settings.quickPaste': '快速粘贴模式',
   'settings.quickPasteDesc': '按 Enter 后回到原应用并自动粘贴',
   'empty.firstPasteHint': '复制一段内容，然后按 Ctrl + Shift + V，方向键选择并按 Enter 粘贴。',
+  'empty.shortcutHint': '快速粘贴',
   'app.loading': '加载中...',
   'app.retry': '重试',
   'app.loadFailed': '加载失败，请重启应用',
@@ -104,6 +105,7 @@ const zh = {
   'bulk.close': '退出多选',
 
   'stack.title': '粘贴栈 · {count} 条',
+  'stack.position': '下一条 · 1 / {count}',
   'stack.add': '加入粘贴栈',
   'stack.queued': '已在粘贴栈中',
   'stack.remove': '从粘贴栈移除',
@@ -387,6 +389,7 @@ const en: Record<keyof typeof zh, string> = {
   'settings.quickPaste': 'Quick paste mode',
   'settings.quickPasteDesc': 'Press Enter to return to the previous app and paste automatically',
   'empty.firstPasteHint': 'Copy something, press Ctrl + Shift + V, choose it with the arrow keys, then press Enter to paste.',
+  'empty.shortcutHint': 'Quick paste',
   'app.loading': 'Loading...',
   'app.retry': 'Retry',
   'app.loadFailed': 'Failed to load. Please restart the app.',
@@ -465,6 +468,7 @@ const en: Record<keyof typeof zh, string> = {
   'bulk.close': 'Exit selection',
 
   'stack.title': 'Paste stack · {count}',
+  'stack.position': 'Next · 1 / {count}',
   'stack.add': 'Add to paste stack',
   'stack.queued': 'Already in paste stack',
   'stack.remove': 'Remove from paste stack',

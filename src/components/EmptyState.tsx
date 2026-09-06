@@ -1,5 +1,5 @@
 import React from 'react'
-import { Clipboard, Search, Star, X } from 'lucide-react'
+import { Clipboard, Plus, Search, Star, X } from 'lucide-react'
 import { useClipboardStore } from '../store/clipboardStore'
 import { useI18n } from '../i18n'
 
@@ -9,6 +9,7 @@ const EmptyState: React.FC = () => {
   const filterType = useClipboardStore(s => s.filterType)
   const timeFilter = useClipboardStore(s => s.timeFilter)
   const resetFilters = useClipboardStore(s => s.resetFilters)
+  const setQuickAddOpen = useClipboardStore(s => s.setQuickAddOpen)
   const { t } = useI18n()
 
   const isSearching = searchQuery.length > 0 || Boolean(filterType) || timeFilter !== 'all'
@@ -21,7 +22,7 @@ const EmptyState: React.FC = () => {
   return (
     <div className="h-full flex flex-col items-center justify-center px-8 py-10">
       <div className="relative mb-6 fade-in">
-        <div className="w-16 h-16 rounded-lg flex items-center justify-center soft-float"
+        <div className="w-16 h-16 rounded-lg flex items-center justify-center"
           style={{
             background: 'color-mix(in srgb, var(--color-primary) 6%, transparent)',
             border: '1px solid color-mix(in srgb, var(--color-primary) 8%, transparent)',
@@ -40,6 +41,19 @@ const EmptyState: React.FC = () => {
         <X size={13} />
         {t('search.reset')}
       </button>}
+
+      {!isSearching && !isFavorites && (
+        <div className="mt-6 flex flex-col items-center gap-3 fade-in" style={{ animationDelay: '140ms' }}>
+          <div className="flex items-center gap-2 text-[10px]" style={{ color: 'var(--text-ghost)' }}>
+            <kbd className="rounded border px-1.5 py-1 font-mono" style={{ borderColor: 'var(--border-card)', background: 'var(--bg-surface)' }}>Ctrl + Shift + V</kbd>
+            <span>{t('empty.shortcutHint')}</span>
+          </div>
+          <button onClick={() => setQuickAddOpen(true)} className="inline-flex h-9 items-center gap-2 rounded-md px-4 text-[11px] font-medium interactive-chip" style={{ background: 'var(--color-primary)', color: 'white' }}>
+            <Plus size={13} />
+            {t('search.addSnippet')}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

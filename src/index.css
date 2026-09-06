@@ -361,7 +361,7 @@
   }
 
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: transparent;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
@@ -394,26 +394,21 @@
     border: 1px solid var(--border-card);
     transform: translateZ(0);
     transform-origin: center;
-    will-change: transform, box-shadow;
     transition:
-      transform var(--duration-normal) var(--ease-spring),
       background var(--duration-normal) var(--ease-out-soft),
       border-color var(--duration-normal) var(--ease-out-soft),
-      box-shadow var(--duration-normal) var(--ease-out-soft),
-      opacity var(--duration-normal) ease;
+      box-shadow var(--duration-normal) var(--ease-out-soft);
   }
 
   .glass-card:hover {
     background: var(--bg-card-hover);
     border-color: var(--border-card-hover);
-    box-shadow: var(--shadow-card-hover);
-    transform: translateY(-2px) scale(1.004);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
   }
 
   .glass-card:active {
     background: var(--bg-card-selected);
-    transform: translateY(0) scale(0.987);
-    transition-duration: 90ms;
+    transition-duration: 100ms;
   }
 
   .glass-card.selected {
@@ -422,19 +417,28 @@
     box-shadow: var(--shadow-card-selected);
   }
 
+  .setting-section {
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-divider);
+    border-bottom: 1px solid var(--border-divider);
+  }
+
+  .setting-section + .setting-section {
+    border-top: 0;
+  }
+
   /* 搜索输入框 */
   .search-input {
+    position: relative;
     background: var(--bg-input);
     border: 1px solid var(--border-input);
     transition:
-      transform var(--duration-normal) var(--ease-out-soft),
       background var(--duration-normal) var(--ease-out-soft),
       border-color var(--duration-normal) var(--ease-out-soft),
       box-shadow var(--duration-normal) var(--ease-out-soft);
   }
 
   .search-input:hover {
-    transform: translateY(-1px);
     border-color: var(--border-card-hover);
   }
 
@@ -442,7 +446,26 @@
     background: var(--bg-input-focus);
     border-color: var(--border-input-focus);
     box-shadow: var(--shadow-input-focus);
-    transform: translateY(-1px) scale(1.005);
+  }
+
+  .search-input::after {
+    position: absolute;
+    right: 12px;
+    bottom: -1px;
+    left: 12px;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    content: '';
+    opacity: 0;
+    transform: scaleX(0.35);
+    transform-origin: center;
+    transition: opacity 160ms ease, transform 220ms var(--ease-out-soft);
+  }
+
+  .search-input:focus-within::after {
+    opacity: 1;
+    transform: scaleX(1);
   }
 
   /* 拖拽区域 */
@@ -466,13 +489,12 @@
 
   /* 进入动画 */
   .item-enter {
-    animation: itemEnter 0.32s var(--ease-spring) both;
+    animation: itemEnter 0.22s var(--ease-out-soft) both;
   }
 
   @keyframes itemEnter {
-    from { opacity: 0; transform: translateY(9px) scale(0.985); }
-    65% { opacity: 1; transform: translateY(-1px) scale(1.002); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .fade-in {
@@ -494,12 +516,12 @@
   }
 
   .slide-in-right {
-    animation: slideInRight var(--duration-normal) var(--ease-out-soft) both;
+    animation: slideInRight 0.2s var(--ease-out-soft) both;
   }
 
   @keyframes slideInRight {
-    from { opacity: 0; transform: translateX(14px); filter: blur(2px); }
-    to { opacity: 1; transform: translateX(0); filter: blur(0); }
+    from { opacity: 0; transform: translateX(8px); }
+    to { opacity: 1; transform: translateX(0); }
   }
 
   .slide-up {
@@ -521,31 +543,21 @@
   }
 
   .detail-backdrop {
-    animation: backdropIn var(--duration-normal) ease-out both;
+    animation: backdropIn 0.18s ease-out both;
   }
 
   @keyframes backdropIn {
-    from { opacity: 0; backdrop-filter: blur(0); }
-    to { opacity: 1; backdrop-filter: blur(12px); }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   .detail-panel {
-    animation: detailPanelIn 0.32s var(--ease-out-soft) both;
+    animation: detailPanelIn 0.22s var(--ease-out-soft) both;
   }
 
   @keyframes detailPanelIn {
     from { opacity: 0; transform: translateY(18px) scale(0.985); }
     to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  /* 已复制覆盖层 */
-  .copied-overlay {
-    animation: copiedPop 0.22s ease-out both;
-  }
-
-  @keyframes copiedPop {
-    from { opacity: 0; transform: scale(0.96); }
-    to { opacity: 1; transform: scale(1); }
   }
 
   /* 类型指示条 */
@@ -575,10 +587,10 @@
   }
 
   .card-actions {
-    width: 120px;
+    width: 64px;
     justify-content: flex-end;
-    opacity: 0;
-    pointer-events: none;
+    opacity: 1;
+    pointer-events: auto;
     transition: opacity 120ms ease;
   }
 
@@ -605,7 +617,6 @@
     overflow: hidden;
     isolation: isolate;
     transition:
-      transform var(--duration-fast) var(--ease-spring),
       color var(--duration-fast) ease,
       background var(--duration-fast) ease,
       box-shadow var(--duration-fast) ease;
@@ -614,35 +625,11 @@
   .action-btn:hover {
     background: var(--bg-elevated);
     color: var(--text-secondary);
-    transform: translateY(-1px) scale(1.06);
   }
 
   .action-btn:active {
-    transform: translateY(1px) scale(0.9);
+    background: var(--bg-surface);
     transition-duration: 80ms;
-  }
-
-  .action-btn::after {
-    content: '';
-    position: absolute;
-    inset: 50%;
-    z-index: -1;
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: currentColor;
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.2);
-    pointer-events: none;
-  }
-
-  .action-btn:active::after {
-    animation: buttonRipple 420ms var(--ease-out-soft) both;
-  }
-
-  @keyframes buttonRipple {
-    0% { opacity: 0.18; transform: translate(-50%, -50%) scale(0.2); }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(7); }
   }
 
   .action-btn.copy:hover { color: var(--color-success); background: color-mix(in srgb, var(--color-success) 10%, transparent); }
@@ -666,7 +653,6 @@
     border: none;
     cursor: pointer;
     transition:
-      transform var(--duration-fast) var(--ease-spring),
       color var(--duration-fast) ease,
       background var(--duration-fast) ease;
     letter-spacing: 0;
@@ -675,17 +661,11 @@
   }
 
   .tab-btn span { white-space: nowrap; }
-  .tab-btn:hover { color: var(--text-secondary); transform: translateY(-1px); }
-  .tab-btn:active { transform: translateY(0) scale(0.96); }
+  .tab-btn:hover { color: var(--text-secondary); }
+  .tab-btn:active { color: var(--text-primary); }
   .tab-btn.active {
     color: var(--text-primary);
     background: var(--bg-elevated);
-    animation: tabActivate 0.24s var(--ease-spring) both;
-  }
-
-  @keyframes tabActivate {
-    from { transform: scale(0.96); }
-    to { transform: scale(1); }
   }
 
   /* 窗口控制按钮 */
@@ -701,7 +681,6 @@
     border: none;
     cursor: pointer;
     transition:
-      transform var(--duration-fast) var(--ease-spring),
       color var(--duration-fast) ease,
       background var(--duration-fast) ease;
   }
@@ -709,9 +688,8 @@
   .win-btn:hover {
     color: var(--text-secondary);
     background: var(--bg-elevated);
-    transform: translateY(-1px) scale(1.04);
   }
-  .win-btn:active { transform: translateY(0) scale(0.92); }
+  .win-btn:active { background: var(--bg-surface); }
   .win-btn.active {
     color: var(--color-primary-light);
     background: color-mix(in srgb, var(--color-primary) 12%, transparent);
@@ -782,7 +760,7 @@
   .toggle:active { transform: scale(0.96); }
 
   .toggle.on {
-    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    background: var(--color-primary);
     border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
   }
 
@@ -810,12 +788,10 @@
     border-radius: 50%;
     background: var(--color-success);
     box-shadow: var(--shadow-glow);
-    animation: pulse 2.5s infinite;
   }
 
   .interactive-chip {
     transition:
-      transform var(--duration-fast) var(--ease-spring),
       background var(--duration-fast) ease,
       border-color var(--duration-fast) ease,
       color var(--duration-fast) ease,
@@ -823,31 +799,21 @@
   }
 
   .interactive-chip:hover {
-    transform: translateY(-1px) scale(1.01);
     box-shadow: var(--shadow-btn);
   }
 
   .interactive-chip:active {
-    transform: translateY(1px) scale(0.94);
+    filter: brightness(0.96);
     transition-duration: 80ms;
   }
 
   .icon-badge {
-    animation: badgePop 0.34s var(--ease-spring) both;
+    animation: badgePop 0.22s var(--ease-out-soft) both;
   }
 
   @keyframes badgePop {
-    from { opacity: 0; transform: scale(0.3) rotate(-20deg); }
-    to { opacity: 1; transform: scale(1) rotate(0); }
-  }
-
-  .soft-float {
-    animation: softFloat 3.6s ease-in-out infinite;
-  }
-
-  @keyframes softFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
+    from { opacity: 0; transform: scale(0.78); }
+    to { opacity: 1; transform: scale(1); }
   }
 
   .shimmer {
@@ -872,18 +838,12 @@
   }
 
   .content-fade {
-    animation: contentFade 0.34s var(--ease-out-soft) both;
+    animation: contentFade 0.2s var(--ease-out-soft) both;
   }
 
   @keyframes contentFade {
-    from { opacity: 0; transform: translateY(8px) scale(0.995); }
-    70% { opacity: 1; transform: translateY(-1px) scale(1.001); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(0.9); }
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   /* 减少动画模式 */
@@ -910,24 +870,77 @@ textarea:focus-visible {
   border-color: color-mix(in srgb, var(--color-primary) 35%, var(--border-card));
 }
 
+.glass-card.just-copied {
+  border-color: color-mix(in srgb, var(--color-success) 42%, var(--border-card));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-success) 12%, transparent);
+}
+
+.copy-feedback-rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--color-success);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-success) 45%, transparent);
+  animation: copyFeedbackRail 320ms var(--ease-out-soft) both;
+  pointer-events: none;
+}
+
+@keyframes copyFeedbackRail {
+  from { opacity: 0; transform: scaleY(0.35); transform-origin: center; }
+  to { opacity: 1; transform: scaleY(1); transform-origin: center; }
+}
+
 .stack-bar {
-  animation: stackBarIn 360ms var(--ease-spring) both;
+  animation: stackBarIn 180ms var(--ease-out-soft) both;
   box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--color-success) 12%, transparent);
 }
 
 @keyframes stackBarIn {
-  from { opacity: 0; transform: translateY(-8px) scaleY(0.86); transform-origin: top; }
-  68% { opacity: 1; transform: translateY(1px) scaleY(1.01); }
-  to { opacity: 1; transform: translateY(0) scaleY(1); }
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .stack-chip {
-  animation: stackChipIn 300ms var(--ease-bounce) both;
+  animation: stackChipIn 180ms var(--ease-out-soft) both;
 }
 
 @keyframes stackChipIn {
-  from { opacity: 0; transform: translateX(-8px) scale(0.86); }
-  to { opacity: 1; transform: translateX(0) scale(1); }
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.stack-chip.current {
+  color: var(--text-primary) !important;
+  border: 1px solid color-mix(in srgb, var(--color-success) 26%, var(--border-card));
+  box-shadow: inset 2px 0 0 var(--color-success);
+}
+
+.stack-chip-current-enter {
+  animation: stackCurrentIn 240ms var(--ease-out-soft) both;
+}
+
+@keyframes stackCurrentIn {
+  from {
+    border-color: color-mix(in srgb, var(--color-success) 6%, var(--border-card));
+    box-shadow: inset 0 0 0 transparent;
+  }
+  to {
+    border-color: color-mix(in srgb, var(--color-success) 26%, var(--border-card));
+    box-shadow: inset 2px 0 0 var(--color-success);
+  }
+}
+
+.card-menu {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-card-hover);
+  backdrop-filter: blur(18px);
+}
+
+.clipboard-card > .type-bar {
+  border-radius: 8px 8px 0 0;
 }
 
 .filter-chip {
@@ -1039,11 +1052,6 @@ textarea:focus-visible {
     width: 60px;
   }
 
-  .clipboard-card .card-actions .pin,
-  .clipboard-card .card-actions button:nth-child(3) {
-    display: none;
-  }
-
   .settings-layout {
     flex-direction: column;
   }
@@ -1068,5 +1076,14 @@ textarea:focus-visible {
 
   .settings-content {
     padding: 12px;
+  }
+
+  .setting-item {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .setting-item > .flex-shrink-0 {
+    margin-left: 0;
   }
 }

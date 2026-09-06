@@ -18,6 +18,12 @@ export const defaultSensitiveContentRules: SensitiveContentRules = {
   identityNumbers: true,
 }
 
+export function getClipboardPrivacyScanText(content: unknown, html: unknown, rtf: unknown): string {
+  return [content, html, rtf]
+    .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+    .join('\n')
+}
+
 export function normalizeSensitiveContentRules(value: unknown): SensitiveContentRules {
   const input = value && typeof value === 'object' && !Array.isArray(value) ? value as Partial<SensitiveContentRules> : {}
   return {

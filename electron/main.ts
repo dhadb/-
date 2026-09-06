@@ -8,7 +8,7 @@ import { compareVersions } from '../src/utils/version'
 import { parseClipMasterReleaseApiPayload, parseClipMasterReleasePage, parseClipMasterReleaseUrl, parseReleaseChecksum } from '../src/utils/update'
 import { getLocalDateKey, normalizeDailyCounter } from '../src/utils/dailyCounter'
 import { compileIgnoredRules, matchesIgnoredRules, normalizeIgnoredPatterns, type CompiledIgnoredRule } from '../src/utils/ignoredRules'
-import { defaultSensitiveContentRules, isSensitiveClipboardContent, normalizeSensitiveContentRules } from '../src/utils/privacy'
+import { defaultSensitiveContentRules, getClipboardPrivacyScanText, isSensitiveClipboardContent, normalizeSensitiveContentRules } from '../src/utils/privacy'
 import { matchesBlockedApplication, normalizeBlockedApplications } from '../src/utils/applicationPrivacy'
 import { isResolvedPathInside } from '../src/utils/pathSafety'
 import { retainHistoryItems } from '../src/utils/retention'
@@ -54,6 +54,7 @@ type HotkeyAction = 'toggle' | 'search' | 'clear'
 const currentHotkeys = new Map<HotkeyAction, string>()
 const pendingImageDeletes = new Map<string, ReturnType<typeof setTimeout>>()
 let storageEncryptionState: 'encrypted' | 'plain' | 'unknown' = 'unknown'
+let dataRecoveredFromBackup = false
 let foregroundTracker: ReturnType<typeof setInterval> | null = null
 let foregroundTrackerRequestInFlight = false
 let foregroundSampleSequence = 0
@@ -92,7 +93,7 @@ const defaultSettings = {
   clearHotkey: 'CommandOrControl+Shift+Delete',
   autoStart: true,
   minimizeToTray: true,
-  theme: 'dark' as ThemeSetting,
+  theme: 'graphite' as ThemeSetting,
   accentColor: 'theme' as AccentSetting,
   language: 'system' as 'system' | 'zh-CN' | 'en-US',
   opacity: 0.95,
@@ -216,7 +217,7 @@ function sanitizeSettings(input: Partial<Settings> | undefined): Settings {
     clearHotkey: typeof raw.clearHotkey === 'string' && raw.clearHotkey.trim() ? raw.clearHotkey.trim() : defaultSettings.clearHotkey,
     autoStart: Boolean(raw.autoStart),
     minimizeToTray: Boolean(raw.minimizeToTray),
-    theme: isThemeSetting(raw.theme) ? raw.theme : 'dark',
+    theme: isThemeSetting(raw.theme) ? raw.theme : 'graphite',
     accentColor: isAccentSetting(raw.accentColor) ? raw.accentColor : 'theme',
     language: raw.language === 'zh-CN' || raw.language === 'en-US' ? raw.language : 'system',
     opacity: clamp(raw.opacity, 0.7, 1, defaultSettings.opacity),
@@ -664,6 +665,7 @@ function loadData() {
   )
   if (recovered.primaryError) console.error('Failed to load data:', recovered.primaryError)
   if (recovered.backupError) console.error('Failed to load backup data:', recovered.backupError)
+  dataRecoveredFromBackup = recovered.source === 'backup'
   if (recovered.value) {
     applyLoadedData(recovered.value)
     if (storageEncryptionState === 'plain' && isDataEncryptionAvailable()) scheduleSave()
@@ -682,8 +684,9 @@ function saveData() {
     const serialized = serializePersistedData(data)
     const tmpPath = `${dataPath}.${process.pid}.tmp`
     fs.writeFileSync(tmpPath, serialized, 'utf-8')
-    if (fs.existsSync(dataPath)) fs.copyFileSync(dataPath, backupPath)
+    if (fs.existsSync(dataPath) && !dataRecoveredFromBackup) fs.copyFileSync(dataPath, backupPath)
     fs.renameSync(tmpPath, dataPath)
+    dataRecoveredFromBackup = false
   } catch (err) {
     console.error('Failed to save data:', err)
   }
@@ -1171,8 +1174,6 @@ function startClipboardWatcher() {
       }
       if (pauseMode === 'timed' && pauseUntil > 0 && pauseUntil <= Date.now()) resumeMonitoring()
       maybeResumeApplicationPause()
-      if (isMonitoringPaused()) return
-
       // 错误计数器重置：如果连续成功，重置错误计数
       let hasError = false
 
@@ -1206,6 +1207,15 @@ function startClipboardWatcher() {
       }
       const clipboardFormatHash = getClipboardFormatHash(currentContent, currentHtml, currentRtf)
 
+      if (isMonitoringPaused()) {
+        lastClipboardContent = currentContent
+        lastClipboardFormatHash = clipboardFormatHash
+        if (settings.recordImages && currentFiles.length === 0) {
+          try { saveClipboardImage(false) } catch (imageErr) { console.error('Failed to baseline paused image:', imageErr) }
+        }
+        return
+      }
+
       if (currentContent && currentContent !== lastClipboardContent && !isTextWithinLimit(currentContent)) {
         lastClipboardContent = currentContent
         lastClipboardFormatHash = clipboardFormatHash
@@ -1229,14 +1239,16 @@ function startClipboardWatcher() {
         return
       }
 
-      if (currentContent && clipboardFormatHash !== lastClipboardFormatHash && matchesIgnoredPattern(currentContent)) {
+      const privacyScanText = getClipboardPrivacyScanText(currentContent, currentHtml, currentRtf)
+
+      if (privacyScanText && clipboardFormatHash !== lastClipboardFormatHash && matchesIgnoredPattern(privacyScanText)) {
         lastClipboardContent = currentContent
         lastClipboardFormatHash = clipboardFormatHash
         recordProtectedItem()
         return
       }
 
-      if (settings.ignoreSensitive && currentContent && clipboardFormatHash !== lastClipboardFormatHash && isSensitiveClipboardContent(currentContent, settings.sensitiveRules)) {
+      if (settings.ignoreSensitive && privacyScanText && clipboardFormatHash !== lastClipboardFormatHash && isSensitiveClipboardContent(privacyScanText, settings.sensitiveRules)) {
         lastClipboardContent = currentContent
         lastClipboardFormatHash = clipboardFormatHash
         recordProtectedItem()
