@@ -90,10 +90,10 @@ const defaultSettings: Settings = {
   clearHotkey: 'CommandOrControl+Shift+Delete',
   autoStart: true,
   minimizeToTray: true,
-  theme: 'dark',
+  theme: 'graphite',
   accentColor: 'theme',
   language: 'system',
-  opacity: 0.98,
+  opacity: 0.95,
   fontSize: 14,
   windowWidth: 420,
   windowHeight: 600,
@@ -136,7 +136,7 @@ function normalizeSettings(settings: Partial<Settings>): Settings {
   const merged = { ...defaultSettings, ...settings }
   return {
     ...merged,
-    theme: isThemeSetting(merged.theme) ? merged.theme : 'dark',
+    theme: isThemeSetting(merged.theme) ? merged.theme : 'graphite',
     accentColor: isAccentSetting(merged.accentColor) ? merged.accentColor : 'theme',
     language: merged.language === 'zh-CN' || merged.language === 'en-US' ? merged.language : 'system',
     sensitiveRules: normalizeSensitiveContentRules(merged.sensitiveRules),
