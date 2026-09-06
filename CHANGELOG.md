@@ -1,5 +1,27 @@
 # Changelog
 
+## 4.0.0 - 2026-09-06
+
+### Visual system
+
+- Reworked the default visual language around the graphite theme, Windows-native typography, flatter content surfaces, restrained borders, and clearer information hierarchy.
+- Reduced glass and blur usage to the app shell, dialogs, and menus so dense clipboard history remains readable.
+- Simplified card actions around a single copy action with a compact more-actions menu for pinning, favoriting, stacking, and deletion.
+
+### Motion and feedback
+
+- Replaced full-card copied overlays with a local success rail and copy-icon confirmation that preserves the content being reviewed.
+- Added a one-shot current-item transition for Clipboard Stack progress without repeatedly animating the entire queue.
+- Removed decorative floating, pulse, rotation, and mobile-style ripple effects from normal desktop workflows.
+- Kept short enter, dialog, focus, and state transitions and honored reduced-motion preferences.
+
+### Reliability and privacy
+
+- Prevented damaged primary data from overwriting a healthy backup after backup recovery.
+- Updated paused monitoring baselines so clipboard content copied during a privacy pause is not recorded when monitoring resumes.
+- Included HTML, RTF, and file paths in sensitive-content scanning and retention-budget calculations.
+- Added stricter renderer and Node-side type checking to the release checks.
+
 ## 3.1.0 - 2026-08-18
 
 ### Features
