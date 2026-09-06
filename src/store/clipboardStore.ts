@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type {} from '../electron-api'
 import type { LanguageSetting } from '../i18n'
 import { createClipboardSearchIndex, matchesClipboardQuery, normalizeTags, searchClipboardIndex, type ClipboardSearchIndex } from '../utils/clipboard'
 import { isThemeSetting, type ThemeSetting } from '../theme'
