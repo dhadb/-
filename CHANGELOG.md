@@ -1,5 +1,20 @@
 # Changelog
 
+## 5.0.0 - 2026-09-06
+
+### Quick Paste Workspace
+
+- Added two focused work modes: compact Quick Paste for global shortcut workflows and a wider Library workspace for managing clipboard knowledge.
+- Added a persistent workspace rail for History, Favorites, Collections, Stats, and Settings, with a dedicated mode switch in the title bar.
+- Added a contextual content inspector with full preview, copy, pin, favorite, open-link, metadata, source application, workspace, and tag actions.
+- Made library clicks select and inspect records without triggering a paste; keyboard Enter and Alt+number shortcuts now paste only in Quick Paste mode.
+
+### Window behavior and quality
+
+- Made mode-based window sizing display-aware, including taskbar work areas, multi-monitor coordinates, and constrained small displays.
+- Resize the window before it is shown to avoid visible jumps when opening a workspace.
+- Improved keyboard accessibility for the title-bar home control and added workspace-mode store coverage.
+
 ## 4.0.0 - 2026-09-06
 
 ### Visual system

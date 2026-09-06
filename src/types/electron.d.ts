@@ -1,5 +1,6 @@
 import type { ClipboardItem } from './clipboard'
 import type { Settings, PrivacyState } from '../store/clipboardStore'
+import type { ViewMode } from '../store/clipboardStore'
 
 export interface ClipboardItemDraft {
   content: string
@@ -59,6 +60,7 @@ export interface ElectronAPI {
   minimizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>
   toggleMaximize: () => Promise<void>
+  setWindowMode: (mode: ViewMode) => Promise<void>
   getImageInfo: (imagePath?: string) => Promise<{ bytes: number; width: number; height: number } | null>
   cleanupImageCache: () => Promise<{ deleted: number; bytes: number }>
   clearAllHistory: () => Promise<ClipboardItem[]>
@@ -69,6 +71,7 @@ export interface ElectronAPI {
   onUpdateDownloadProgress: (callback: (progress: UpdateDownloadProgress) => void) => () => void
   onFocusSearch: (callback: () => void) => () => void
   onShowSettings: (callback: () => void) => () => void
+  onWindowMode: (callback: (mode: ViewMode) => void) => () => void
 }
 
 declare global {

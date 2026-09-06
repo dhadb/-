@@ -8,7 +8,11 @@ import ConfirmDialog from './ConfirmDialog'
 
 type ClearMode = 'kept' | 'all' | null
 
-const TabBar: React.FC = memo(() => {
+interface Props {
+  variant?: 'tabs' | 'library'
+}
+
+const TabBar: React.FC<Props> = memo(({ variant = 'tabs' }) => {
   const activeTab = useClipboardStore(s => s.activeTab)
   const setActiveTab = useClipboardStore(s => s.setActiveTab)
   const clearHistory = useClipboardStore(s => s.clearHistory)
@@ -108,7 +112,12 @@ const TabBar: React.FC = memo(() => {
     <>
       <div className="relative flex h-10 items-center justify-between border-b px-3" style={{ borderColor: 'var(--border-divider)' }}>
         <div className="flex min-w-0 items-center gap-0.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          {tabs.map(tab => {
+          {variant === 'library' ? (
+            <div className="library-toolbar-title">
+              <span>{tabs.find(tab => tab.id === activeTab)?.label || t('workspace.library')}</span>
+              {(activeTab === 'history' || activeTab === 'favorites') && <span className="tab-count">{activeTab === 'favorites' ? favoriteCount : history.length}</span>}
+            </div>
+          ) : tabs.map(tab => {
             const active = activeTab === tab.id
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`tab-btn ${active ? 'active' : ''}`}>

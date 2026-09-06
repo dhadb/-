@@ -14,6 +14,8 @@ import BulkActionBar from './components/BulkActionBar'
 import ToastCenter from './components/ToastCenter'
 import PrivacyStatusBar from './components/PrivacyStatusBar'
 import ClipboardStackBar from './components/ClipboardStackBar'
+import WorkspaceRail from './components/WorkspaceRail'
+import ClipboardInspector from './components/ClipboardInspector'
 
 const ClipboardDetail = React.lazy(() => import('./components/ClipboardDetail'))
 const SettingsPanel = React.lazy(() => import('./components/SettingsPanel'))
@@ -31,10 +33,12 @@ function PanelLoading() {
 
 function App() {
   const activeTab = useClipboardStore(s => s.activeTab)
+  const viewMode = useClipboardStore(s => s.viewMode)
   const showSettings = useClipboardStore(s => s.showSettings)
   const detailItemId = useClipboardStore(s => s.detailItemId)
   const quickAddOpen = useClipboardStore(s => s.quickAddOpen)
   const filteredHistory = useClipboardStore(s => s.filteredHistory)
+  const selectionMode = useClipboardStore(s => s.selectionMode)
   const settings = useClipboardStore(s => s.settings)
   const setHistory = useClipboardStore(s => s.setHistory)
   const setSettings = useClipboardStore(s => s.setSettings)
@@ -123,12 +127,19 @@ function App() {
           if (!isMounted) return
           setShowSettings(false)
           setActiveTab('history')
+          useClipboardStore.getState().setViewMode('quick')
+          void window.electronAPI?.setWindowMode('quick')
           setTimeout(() => window.dispatchEvent(new Event('clipmaster-focus-search')), 0)
+        }))
+        addCleanup(window.electronAPI.onWindowMode((mode) => {
+          if (isMounted) useClipboardStore.getState().setViewMode(mode)
         }))
         addCleanup(window.electronAPI.onShowSettings(() => {
           if (isMounted) {
             setShowSettings(true)
             setActiveTab('settings')
+            useClipboardStore.getState().setViewMode('library')
+            void window.electronAPI?.setWindowMode('library')
           }
         }))
 
@@ -195,8 +206,8 @@ function App() {
     if (activeTab === 'collections') return <Suspense fallback={<PanelLoading />}><CollectionsPanel /></Suspense>
     if (activeTab === 'stats') return <Suspense fallback={<PanelLoading />}><StatsPanel /></Suspense>
     if (filteredHistory.length === 0) return <EmptyState />
-    return <ClipboardList />
-  }, [activeTab, showSettings, filteredHistory.length])
+    return <ClipboardList variant={viewMode} />
+  }, [activeTab, showSettings, filteredHistory.length, viewMode])
 
   if (!loaded) {
     return (
@@ -237,16 +248,24 @@ function App() {
 
   return (
     <div
-      className="relative h-screen w-screen overflow-hidden rounded-xl glass-effect flex flex-col"
+      className={`relative h-screen w-screen overflow-hidden rounded-xl glass-effect flex flex-col ${viewMode === 'library' ? 'library-shell' : 'quick-shell'}`}
       style={{ opacity: settings.opacity, transform: 'translateZ(0)' }}
     >
       <TitleBar />
-      <UpdateBanner />
-      <ClipboardStackBar />
-      {showSearch && <SearchBar />}
-      {!showSettings && activeTab !== 'settings' && <TabBar />}
-      {showSearch && <BulkActionBar />}
-      <div key={`${activeTab}-${showSettings ? 'settings' : 'content'}`} className="flex-1 overflow-hidden content-fade">{content}</div>
+      <div className="flex min-h-0 flex-1">
+        {viewMode === 'library' && <WorkspaceRail />}
+        <main className="flex min-w-0 flex-1 flex-col">
+          <UpdateBanner />
+          <ClipboardStackBar />
+          {showSearch && <SearchBar />}
+          {viewMode === 'library' && !showSettings && activeTab !== 'settings' && <TabBar variant="library" />}
+          {viewMode === 'library' && showSearch && <BulkActionBar />}
+          <div className="flex min-h-0 flex-1">
+            <div key={`${activeTab}-${showSettings ? 'settings' : 'content'}`} className="min-w-0 flex-1 overflow-hidden content-fade">{content}</div>
+            {viewMode === 'library' && showSearch && !selectionMode && <ClipboardInspector />}
+          </div>
+        </main>
+      </div>
       <Suspense fallback={null}>{detailItemId && <ClipboardDetail />}</Suspense>
       <Suspense fallback={null}>{quickAddOpen && <QuickAddDialog />}</Suspense>
       <ToastCenter />

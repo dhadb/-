@@ -1,5 +1,5 @@
 import React, { useCallback, memo } from 'react'
-import { Minus, X, Maximize2, Settings, Edit3 } from 'lucide-react'
+import { Minus, X, Maximize2, Settings, Edit3, Library, Zap } from 'lucide-react'
 import { useClipboardStore } from '../store/clipboardStore'
 import { useI18n } from '../i18n'
 
@@ -10,6 +10,8 @@ const TitleBar: React.FC = memo(() => {
   const setShowSettings = useClipboardStore(s => s.setShowSettings)
   const setActiveTab = useClipboardStore(s => s.setActiveTab)
   const setQuickAddOpen = useClipboardStore(s => s.setQuickAddOpen)
+  const viewMode = useClipboardStore(s => s.viewMode)
+  const setViewMode = useClipboardStore(s => s.setViewMode)
   const privacy = useClipboardStore(s => s.privacy)
   const { t } = useI18n()
 
@@ -18,7 +20,17 @@ const TitleBar: React.FC = memo(() => {
     const next = !showSettings
     setShowSettings(next)
     setActiveTab(next ? 'settings' : 'history')
-  }, [showSettings])
+    const nextMode = next ? 'library' : viewMode
+    setViewMode(nextMode)
+    void window.electronAPI?.setWindowMode(nextMode)
+  }, [setActiveTab, setShowSettings, setViewMode, showSettings, viewMode])
+  const onModeToggle = useCallback(() => {
+    const next = viewMode === 'quick' ? 'library' : 'quick'
+    setViewMode(next)
+    setShowSettings(false)
+    setActiveTab('history')
+    void window.electronAPI?.setWindowMode(next)
+  }, [setActiveTab, setShowSettings, setViewMode, viewMode])
   const onMin = useCallback(() => { window.electronAPI?.minimizeWindow() }, [])
   const onMax = useCallback(() => { window.electronAPI?.toggleMaximize() }, [])
   const onClose = useCallback(() => { window.electronAPI?.closeWindow() }, [])
@@ -26,7 +38,12 @@ const TitleBar: React.FC = memo(() => {
   return (
     <div className="flex h-12 items-center justify-between px-3 drag-region select-none"
       style={{ borderBottom: '1px solid var(--border-divider)' }}>
-      <div className="flex items-center gap-2.5 cursor-pointer no-drag" onClick={onLogo}>
+      <button
+        type="button"
+        className="titlebar-brand flex items-center gap-2.5 cursor-pointer no-drag"
+        onClick={onLogo}
+        aria-label="ClipMaster"
+      >
         <div className="relative w-7 h-7 rounded-md flex items-center justify-center">
           <img
             src={appIconUrl}
@@ -48,8 +65,11 @@ const TitleBar: React.FC = memo(() => {
           </span>
           <span className="text-[9px]" style={{ color: privacy.paused ? 'var(--color-warning)' : 'var(--text-ghost)' }}>{privacy.paused ? t('app.paused') : t('app.localFirst')}</span>
         </div>
-      </div>
+      </button>
       <div className="flex items-center gap-0.5 no-drag">
+        <button onClick={onModeToggle} className="win-btn" title={viewMode === 'quick' ? t('workspace.library') : t('workspace.quick')}>
+          {viewMode === 'quick' ? <Library size={14} /> : <Zap size={14} />}
+        </button>
         <button onClick={() => setQuickAddOpen(true)} className="win-btn" title={t('search.addSnippet')}><Edit3 size={14} /></button>
         <button onClick={onSettings} className={`win-btn ${showSettings ? 'active' : ''}`} title={t('title.settings')}>
           <Settings size={14} />

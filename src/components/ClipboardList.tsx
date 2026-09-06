@@ -6,7 +6,11 @@ import { useI18n } from '../i18n'
 const ITEM_H = 76
 const OVERSCAN = 5
 
-const ClipboardList: React.FC = () => {
+interface Props {
+  variant?: 'quick' | 'library'
+}
+
+const ClipboardList: React.FC<Props> = ({ variant = 'quick' }) => {
   const filteredHistory = useClipboardStore(s => s.filteredHistory)
   const selectedId = useClipboardStore(s => s.selectedId)
   const setSelectedId = useClipboardStore(s => s.setSelectedId)
@@ -109,7 +113,7 @@ const ClipboardList: React.FC = () => {
         scrollToIndex(prev)
       } else if (e.key === 'Enter' && selectedId && !selectionMode) {
         e.preventDefault()
-        void copyItem(selectedId, { pasteAfterCopy: true })
+        void copyItem(selectedId, { pasteAfterCopy: variant === 'quick' })
       } else if (e.key === 'Delete' && selectedId && !selectionMode) {
         e.preventDefault()
         void deleteItems([selectedId]).then(count => {
@@ -119,7 +123,7 @@ const ClipboardList: React.FC = () => {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [copyItem, deleteItems, filteredHistory, notify, scrollToIndex, selectAllFiltered, selectedId, selectionMode, setSelectedId, setSelectionMode, t])
+  }, [copyItem, deleteItems, filteredHistory, notify, scrollToIndex, selectAllFiltered, selectedId, selectionMode, setSelectedId, setSelectionMode, t, variant])
 
   useEffect(() => {
     if (filteredHistory.length === 0) {
@@ -139,15 +143,15 @@ const ClipboardList: React.FC = () => {
       )
       if (isEditing) return
 
-      if (e.altKey && /^[1-9]$/.test(e.key)) {
-        e.preventDefault()
-        const index = parseInt(e.key) - 1
-        if (index < filteredHistory.length) copyItem(filteredHistory[index].id)
-      }
+        if (e.altKey && /^[1-9]$/.test(e.key)) {
+          e.preventDefault()
+          const index = parseInt(e.key) - 1
+          if (index < filteredHistory.length) void copyItem(filteredHistory[index].id, { pasteAfterCopy: variant === 'quick' })
+        }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [filteredHistory, copyItem])
+  }, [filteredHistory, copyItem, variant])
 
   return (
     <div ref={containerRef} className="h-full overflow-y-auto px-2 py-1" style={{ contain: 'layout paint' }}>
@@ -170,6 +174,7 @@ const ClipboardList: React.FC = () => {
                 selectionMode={selectionMode}
                 isChecked={selectedIds.includes(item.id)}
                 onToggleSelection={() => toggleSelection(item.id)}
+                variant={variant}
               />
             </div>
           )

@@ -87,3 +87,18 @@ describe('clipboard stack', () => {
     vi.unstubAllGlobals()
   })
 })
+
+describe('workspace mode', () => {
+  it('keeps the settings panel consistent with the selected workspace', () => {
+    const store = useClipboardStore.getState()
+    store.setActiveTab('settings')
+    store.setViewMode('quick')
+
+    expect(useClipboardStore.getState().viewMode).toBe('quick')
+    expect(useClipboardStore.getState().showSettings).toBe(false)
+
+    useClipboardStore.getState().setViewMode('library')
+    expect(useClipboardStore.getState().viewMode).toBe('library')
+    expect(useClipboardStore.getState().showSettings).toBe(true)
+  })
+})
