@@ -15,6 +15,7 @@ interface Props {
   selectionMode: boolean
   isChecked: boolean
   onToggleSelection: () => void
+  variant?: 'quick' | 'library'
 }
 
 const TYPE_CFG: Record<string, { Icon: LucideIcon; bar: string; cssVar: string }> = {
@@ -60,7 +61,7 @@ function renderHighlightedPreview(text: string, query: string) {
   return segments
 }
 
-const ClipboardItemCard: React.FC<Props> = memo(({ item, isSelected, onSelect, selectionMode, isChecked, onToggleSelection }) => {
+const ClipboardItemCard: React.FC<Props> = memo(({ item, isSelected, onSelect, selectionMode, isChecked, onToggleSelection, variant = 'quick' }) => {
   const copyItem = useClipboardStore(s => s.copyItem)
   const deleteItems = useClipboardStore(s => s.deleteItems)
   const togglePin = useClipboardStore(s => s.togglePin)
@@ -92,12 +93,12 @@ const ClipboardItemCard: React.FC<Props> = memo(({ item, isSelected, onSelect, s
       return
     }
     onSelect()
-    setDetailItemId(item.id)
-  }, [item.id, onSelect, onToggleSelection, selectionMode, setDetailItemId])
+    if (variant === 'quick') setDetailItemId(item.id)
+  }, [item.id, onSelect, onToggleSelection, selectionMode, setDetailItemId, variant])
   const onDoubleClickCopy = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    if (copyOnSelect && !selectionMode) copyItem(item.id)
-  }, [copyOnSelect, copyItem, item.id, selectionMode])
+    if (!selectionMode && (variant === 'quick' || copyOnSelect)) copyItem(item.id, { pasteAfterCopy: variant === 'quick' })
+  }, [copyOnSelect, copyItem, item.id, selectionMode, variant])
   const onDelete = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
     setMenuOpen(false)

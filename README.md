@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.0.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-5.0.0-blue.svg" alt="Version">
   <img src="https://img.shields.io/badge/platform-Windows%2010%2F11-green.svg" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License">
   <img src="https://img.shields.io/badge/privacy-local--first-brightgreen.svg" alt="Local first">
@@ -39,7 +39,7 @@
 - **本地优先**：剪贴板历史、设置和图片缓存只写入本机 `%AppData%/ClipMaster/`。
 - **快速找回**：复制过的文本、链接、代码、颜色、JSON、Markdown 和图片都可以搜索和筛选。
 - **隐私保护**：默认跳过疑似密码、Token、私钥、银行卡号等高风险内容。
-- **键盘友好**：使用 `Ctrl + Shift + V` 全局唤起，搜索、选择、复制都可以快速完成。
+- **双工作区**：使用 `Ctrl + Shift + V` 进入紧凑的快速粘贴；需要整理时切换到资料库，查看完整内容和元数据。
 - **顺手高效**：时间范围、类型和排序可以组合筛选，批量收藏、置顶、加标签与删除不再逐条操作。
 
 ## 快速开始
@@ -47,7 +47,7 @@
 ### 安装使用
 
 1. 打开 [Releases](https://github.com/dhadb/ClipMaster/releases/latest)。
-2. 下载 `ClipMaster-Setup-4.0.0.exe`，或选择 `ClipMaster-Portable-4.0.0.exe` 免安装版。
+2. 下载 `ClipMaster-Setup-5.0.0.exe`，或选择 `ClipMaster-Portable-5.0.0.exe` 免安装版。
 3. 运行安装包并按向导安装；便携版可直接运行。
 4. 复制任意内容并按 `Ctrl + Shift + V` 打开 ClipMaster。
 
@@ -56,7 +56,7 @@
 Release 页面会附带 `checksums.sha256`。下载后可以在 PowerShell 中校验：
 
 ```powershell
-Get-FileHash -Algorithm SHA256 ".\ClipMaster-Setup-4.0.0.exe"
+Get-FileHash -Algorithm SHA256 ".\ClipMaster-Setup-5.0.0.exe"
 ```
 
 将输出的 SHA256 与 `checksums.sha256` 中的值对比。如果不一致，请不要运行安装包，并在 [Issues](https://github.com/dhadb/ClipMaster/issues) 中反馈。
@@ -90,6 +90,7 @@ Get-FileHash -Algorithm SHA256 ".\ClipMaster-Setup-4.0.0.exe"
 | 收藏与标签 | 置顶用于即时高频内容；收藏结合标签用于“常用回复”“开发命令”“收货信息”等长期归档 |
 | 智能集合 | 将搜索、类型、时间和排序组合保存为集合，随历史变化自动更新结果数量 |
 | 工作区 | 自动记录前台 Windows 应用，并可在详情中手动命名“项目 A”“论文”“旅行”等工作区 |
+| 双模式界面 | 快速粘贴保持紧凑聚焦；资料库提供导航栏、内容检查器和完整管理操作 |
 | 批量处理 | 多选记录后统一置顶、收藏、加标签或删除 |
 | 剪贴板栈 | 将多条历史按顺序暂存为临时粘贴队列，逐条复制，不写入本地存储 |
 | 内容编辑 | 在详情页直接修改片段内容和标签，自动重新识别内容类型 |
@@ -116,7 +117,7 @@ Get-FileHash -Algorithm SHA256 ".\ClipMaster-Setup-4.0.0.exe"
 | `Ctrl + F` | 聚焦搜索框 | 应用内 |
 | `Ctrl + N` | 新建常用片段 | 应用内 |
 | `↑` / `↓` | 上下选择 | 应用内 |
-| `Enter` | 回到原 Windows 应用并自动粘贴选中内容 | 应用内 |
+| `Enter` | 在快速粘贴中回到原 Windows 应用并自动粘贴选中内容；在资料库中仅复制 | 应用内 |
 | `Delete` | 删除选中内容 | 应用内 |
 | `Esc` | 清空搜索 / 关闭 | 应用内 |
 
@@ -175,6 +176,7 @@ npm run build -- --publish never
 - [x] 增加安全的更新检查与下载提示
 - [x] 在 `v3.1.0` 增加剪贴板栈与受信 IPC 读取保护
 - [x] 在 `v4.0.0` 完成外观、动效与剪贴流程的桌面化升级
+- [x] 在 `v5.0.0` 增加快速粘贴与资料库双工作区
 - [ ] 为安装包增加 Windows Authenticode 代码签名（证书配置暂缓）
 
 ## 反馈

@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import type { ThemeSetting } from '../src/theme'
 import type { AccentSetting } from '../src/personalization'
 import type { ClipboardItem } from '../src/types/clipboard'
+import type { ViewMode } from '../src/store/clipboardStore'
 import type { SensitiveContentRules } from '../src/utils/privacy'
 
 export interface Settings {
@@ -110,6 +111,7 @@ const electronAPI = {
   minimizeWindow: (): Promise<void> => ipcRenderer.invoke('minimize-window'),
   closeWindow: (): Promise<void> => ipcRenderer.invoke('close-window'),
   toggleMaximize: (): Promise<void> => ipcRenderer.invoke('toggle-maximize'),
+  setWindowMode: (mode: ViewMode): Promise<void> => ipcRenderer.invoke('set-window-mode', mode),
   onHistoryUpdated: (callback: (history: ClipboardItem[]) => void) => {
     const handler = (_event: IpcRendererEvent, history: ClipboardItem[]) => callback(history)
     ipcRenderer.on('history-updated', handler)
@@ -139,6 +141,11 @@ const electronAPI = {
     const handler = () => callback()
     ipcRenderer.on('show-settings', handler)
     return () => { ipcRenderer.removeListener('show-settings', handler) }
+  },
+  onWindowMode: (callback: (mode: ViewMode) => void) => {
+    const handler = (_event: IpcRendererEvent, mode: ViewMode) => callback(mode === 'quick' ? 'quick' : 'library')
+    ipcRenderer.on('window-mode', handler)
+    return () => { ipcRenderer.removeListener('window-mode', handler) }
   },
 }
 

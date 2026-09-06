@@ -28,6 +28,7 @@ import {
 } from '../src/utils/limits'
 import { isThemeSetting, type ThemeSetting } from '../src/theme'
 import { isAccentSetting, type AccentSetting } from '../src/personalization'
+import type { ViewMode } from '../src/store/clipboardStore'
 import { clipboardTypes as CLIPBOARD_TYPES, type ClipboardItem, type ClipboardType, type SavedFilter } from '../src/types/clipboard'
 
 let mainWindow: BrowserWindow | null = null
@@ -954,9 +955,9 @@ function registerHotkeys(nextSettings = settings) {
   unregisterHotkeys()
   let allRegistered = true
   const callbacks: Record<HotkeyAction, () => void> = {
-    toggle: () => toggleWindow(),
+    toggle: () => toggleWindow('quick'),
     search: () => {
-      void showWindow().then(() => mainWindow?.webContents.send('focus-search'))
+      void showWindow('quick').then(() => mainWindow?.webContents.send('focus-search'))
     },
     clear: () => {
       removeHistoryItems(item => !item.pinned && !item.favorited)
@@ -977,16 +978,18 @@ function registerHotkeys(nextSettings = settings) {
 }
 
 function createWindow() {
-  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
+  const workArea = screen.getPrimaryDisplay().workArea
+  const width = Math.min(settings.windowWidth, Math.max(1, workArea.width - 32))
+  const height = Math.min(settings.windowHeight, Math.max(1, workArea.height - 32))
   const iconPath = isDev
     ? path.join(__dirname, '../public/icon.ico')
     : path.join(__dirname, '../dist/icon.ico')
 
   mainWindow = new BrowserWindow({
-    width: settings.windowWidth,
-    height: settings.windowHeight,
-    x: screenWidth - settings.windowWidth - 20,
-    y: screenHeight - settings.windowHeight - 40,
+    width,
+    height,
+    x: workArea.x + workArea.width - width - 16,
+    y: workArea.y + workArea.height - height - 16,
     frame: false,
     transparent: true,
     resizable: true,
@@ -1050,9 +1053,9 @@ function rebuildTrayMenu() {
   const paused = isMonitoringPaused()
   tray.setToolTip(getTrayText('tooltip'))
   const contextMenu = Menu.buildFromTemplate([
-    { label: getTrayText('show'), click: () => toggleWindow() },
+    { label: getTrayText('show'), click: () => toggleWindow('library') },
     { label: getTrayText('search'), click: () => {
-      void showWindow().then(() => mainWindow?.webContents.send('focus-search'))
+      void showWindow('library').then(() => mainWindow?.webContents.send('focus-search'))
     } },
     { type: 'separator' },
     { label: paused ? getTrayText('resume') : getTrayText('pause5'), click: () => paused ? resumeMonitoring() : pauseMonitoring(5) },
@@ -1066,7 +1069,7 @@ function rebuildTrayMenu() {
     { type: 'separator' },
     { label: getTrayText('settings'), click: () => {
       mainWindow?.webContents.send('show-settings')
-      showWindow()
+      showWindow('library')
     }},
     { type: 'separator' },
     { label: getTrayText('quit'), click: () => {
@@ -1114,8 +1117,45 @@ function resumeMonitoring() {
   scheduleSave()
 }
 
-async function showWindow() {
+function applyWindowMode(mode: ViewMode) {
+  if (!mainWindow) return
+  if (isMaximized) {
+    isMaximized = false
+    savedBounds = null
+  }
+  const targetSize = mode === 'quick'
+    ? { width: 520, height: 680 }
+    : { width: 980, height: 720 }
+
+  const display = screen.getDisplayMatching(mainWindow.getBounds())
+  const margin = 16
+  const availableWidth = Math.max(1, display.workArea.width - margin * 2)
+  const availableHeight = Math.max(1, display.workArea.height - margin * 2)
+  const minimumSize = mode === 'quick'
+    ? { width: 420, height: 520 }
+    : { width: 760, height: 560 }
+  const minimumWidth = Math.min(minimumSize.width, availableWidth)
+  const minimumHeight = Math.min(minimumSize.height, availableHeight)
+  const width = Math.min(Math.max(targetSize.width, minimumWidth), availableWidth)
+  const height = Math.min(Math.max(targetSize.height, minimumHeight), availableHeight)
+  const currentBounds = mainWindow.getBounds()
+  const x = Math.min(
+    Math.max(currentBounds.x, display.workArea.x + margin),
+    display.workArea.x + display.workArea.width - width - margin,
+  )
+  const y = Math.min(
+    Math.max(currentBounds.y, display.workArea.y + margin),
+    display.workArea.y + display.workArea.height - height - margin,
+  )
+
+  mainWindow.setMinimumSize(minimumWidth, minimumHeight)
+  mainWindow.setBounds({ x, y, width, height }, true)
+  mainWindow.webContents.send('window-mode', mode)
+}
+
+async function showWindow(mode: ViewMode = 'library') {
   if (mainWindow?.isVisible()) {
+    applyWindowMode(mode)
     mainWindow.focus()
     return
   }
@@ -1124,6 +1164,7 @@ async function showWindow() {
 
   showWindowPromise = (async () => {
     await captureQuickPasteTarget()
+    applyWindowMode(mode)
     mainWindow?.show()
     mainWindow?.focus()
   })().finally(() => {
@@ -1132,12 +1173,12 @@ async function showWindow() {
   return showWindowPromise
 }
 
-function toggleWindow() {
+function toggleWindow(mode: ViewMode = 'quick') {
   if (mainWindow?.isVisible()) {
     quickPasteTarget = null
     mainWindow.hide()
   } else {
-    void showWindow()
+    void showWindow(mode)
   }
 }
 
@@ -2038,10 +2079,14 @@ ipcMain.handle('toggle-maximize', event => {
     isMaximized = false
   } else {
     savedBounds = mainWindow.getBounds()
-    const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
-    mainWindow.setBounds({ x: 0, y: 0, width: screenWidth, height: screenHeight })
+    const workArea = screen.getDisplayMatching(savedBounds).workArea
+    mainWindow.setBounds(workArea)
     isMaximized = true
   }
+})
+ipcMain.handle('set-window-mode', (event, requestedMode: ViewMode) => {
+  assertTrustedRenderer(event)
+  applyWindowMode(requestedMode === 'quick' ? 'quick' : 'library')
 })
 
 // App lifecycle

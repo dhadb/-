@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type {} from '../electron-api'
 import type { LanguageSetting } from '../i18n'
 import { createClipboardSearchIndex, matchesClipboardQuery, normalizeTags, searchClipboardIndex, type ClipboardSearchIndex } from '../utils/clipboard'
 import { isThemeSetting, type ThemeSetting } from '../theme'
@@ -73,6 +74,7 @@ export interface UpdateDownloadProgress {
 
 export type UpdateStatus = 'idle' | 'checking' | 'available' | 'downloading' | 'downloaded' | 'installing' | 'current' | 'error'
 export type ActiveTab = 'history' | 'favorites' | 'collections' | 'stats' | 'settings'
+export type ViewMode = 'quick' | 'library'
 export type SortMode = 'newest' | 'oldest' | 'most-used'
 export type TimeFilter = 'all' | 'today' | 'week'
 
@@ -202,6 +204,7 @@ interface ClipboardStore {
   updateDownloadProgress: UpdateDownloadProgress
   updateDismissed: boolean
   activeTab: ActiveTab
+  viewMode: ViewMode
   copiedId: string | null
   detailItemId: string | null
   filterType: string | null
@@ -230,6 +233,7 @@ interface ClipboardStore {
   installUpdate: () => Promise<boolean>
   dismissUpdate: () => void
   setActiveTab: (tab: ActiveTab) => void
+  setViewMode: (mode: ViewMode) => void
   setDetailItemId: (id: string | null) => void
   setFilterType: (type: string | null) => void
   setSortMode: (mode: SortMode) => void
@@ -279,6 +283,7 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
   updateDownloadProgress: { receivedBytes: 0, totalBytes: null, percent: null },
   updateDismissed: false,
   activeTab: 'history',
+  viewMode: 'library',
   copiedId: null,
   detailItemId: null,
   filterType: null,
@@ -383,6 +388,7 @@ export const useClipboardStore = create<ClipboardStore>((set, get) => ({
     const { history, searchQuery, filterType, sortMode, timeFilter } = get()
     set({ activeTab, showSettings: activeTab === 'settings', filteredHistory: filterHistory(history, activeTab, searchQuery, filterType, sortMode, timeFilter, historySearchIndex), selectionMode: false, selectedIds: [] })
   },
+  setViewMode: (viewMode) => set({ viewMode, showSettings: viewMode === 'library' && get().activeTab === 'settings' }),
 
   setFilterType: (filterType) => {
     const { history, searchQuery, activeTab, sortMode, timeFilter } = get()

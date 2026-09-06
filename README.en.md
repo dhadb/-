@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.0.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-5.0.0-blue.svg" alt="Version">
   <img src="https://img.shields.io/badge/platform-Windows%2010%2F11-green.svg" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License">
   <img src="https://img.shields.io/badge/privacy-local--first-brightgreen.svg" alt="Local first">
@@ -39,13 +39,13 @@
 - **Local-first**: Clipboard history, settings, and image cache are stored only under `%AppData%/ClipMaster/`.
 - **Fast recovery**: Fuzzy, pinyin, tag, type, and workspace search finds copied text, links, code snippets, colors, JSON, Markdown, and images.
 - **Privacy guardrails**: High-risk content such as passwords, tokens, private keys, and card numbers is skipped by default.
-- **Quick paste**: Press `Ctrl + Shift + V`, choose an entry with the arrow keys, then press `Enter` to return to the previous Windows app and paste it automatically.
+- **Two focused workspaces**: Press `Ctrl + Shift + V` for compact Quick Paste, then switch to Library when you need full content, metadata, and management tools.
 - **Efficient workflows**: Combine time, type, and sort filters, then batch favorite, pin, tag, or delete records.
 
 ## Quick Start
 
 1. Open [Releases](https://github.com/dhadb/ClipMaster/releases/latest).
-2. Download `ClipMaster-Setup-4.0.0.exe`, or choose `ClipMaster-Portable-4.0.0.exe`.
+2. Download `ClipMaster-Setup-5.0.0.exe`, or choose `ClipMaster-Portable-5.0.0.exe`.
 3. Run the installer, or launch the portable build directly.
 4. Copy anything, press `Ctrl + Shift + V`, select an entry with the arrow keys, and press `Enter` to paste it back into the previous app.
 
@@ -54,7 +54,7 @@
 Release assets include `checksums.sha256`. After downloading the installer, verify it in PowerShell:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 ".\ClipMaster-Setup-4.0.0.exe"
+Get-FileHash -Algorithm SHA256 ".\ClipMaster-Setup-5.0.0.exe"
 ```
 
 Compare the SHA256 output with `checksums.sha256`. If it does not match, do not run the installer and report it in [Issues](https://github.com/dhadb/ClipMaster/issues).
@@ -87,6 +87,7 @@ Starting with `v1.4.1`, ClipMaster can download the official Windows installer i
 | Favorites | Use pinning for immediate access; keep longer-lived replies, commands, and addresses in Favorites, then organize them with tags |
 | Smart collections | Save a combined search, type, time, and sort view; result counts update as history changes |
 | Workspaces | Automatically label captures by the foreground Windows app; add a manual workspace such as Project A, thesis, or travel in details |
+| Two-mode workspace | Use compact Quick Paste for shortcut-driven paste flows and Library for navigation, inspection, and management |
 | Batch actions | Pin, favorite, tag, or delete multiple selected records |
 | Clipboard Stack | Queue multiple history items as a temporary paste list and copy them in order without persisting the queue |
 | Content editing | Edit snippet content and tags in details with automatic type detection |
@@ -113,7 +114,7 @@ Starting with `v1.4.1`, ClipMaster can download the official Windows installer i
 | `Ctrl + F` | Focus search | In app |
 | `Ctrl + N` | Create a reusable snippet | In app |
 | `↑` / `↓` | Move selection | In app |
-| `Enter` | Paste selected item back into the previous Windows app | In app |
+| `Enter` | Paste selected item back into the previous Windows app in Quick Paste; copy only in Library | In app |
 | `Delete` | Delete selected item | In app |
 | `Esc` | Clear search / close | In app |
 
@@ -126,6 +127,7 @@ Starting with `v1.4.1`, ClipMaster can download the official Windows installer i
 - [x] Support custom shortcuts, portable downloads, and secure update downloads
 - [x] Add Clipboard Stack and trusted IPC reads in `v3.1.0`
 - [x] Ship the `v4.0.0` visual, motion, and paste-flow refresh
+- [x] Ship the `v5.0.0` Quick Paste and Library workspace update
 - [ ] Add Windows Authenticode code signing (certificate setup deferred)
 
 ## Development
